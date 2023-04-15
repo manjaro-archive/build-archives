@@ -4,7 +4,7 @@ description: 'Builds Manjaro Archives'
 inputs:
   build-mirror:
     description: 'mirror to be used for list overlay'
-    required: false
+    required: true
     default: 'https://mirrors.manjaro.org/repo'
   ssh-key:
     description: 'ssh secret key'
