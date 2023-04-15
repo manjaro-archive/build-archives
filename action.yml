@@ -1,0 +1,280 @@
+name: 'Manjaro Builds Archives Action'
+description: 'Builds Manjaro Archives'
+
+inputs:
+  build-mirror:
+    description: 'mirror to be used for list overlay'
+    required: false
+    default: 'https://mirrors.manjaro.org/repo'
+  ssh-key:
+    description: 'ssh secret key'
+    required: true
+  ssh-passphrase:
+    description: 'passphrase for ssh key'
+    required: true
+  boxit-host:
+    description: 'boxit login address'
+    required: true
+  boxit-target:
+    description: 'boxit rsync target'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - id: install_build-dependencies
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install \
+        build-essential \
+        cmake \
+        fakeroot \
+        git \
+        libarchive-dev \
+        libarchive-tools \
+        libcurl4-openssl-dev \
+        libgpgme-dev \
+        libssl-dev \
+        zip \
+        python3-pip
+        sudo pip3 install meson
+        sudo pip3 install ninja
+    - id: install_pacman
+      shell: bash
+      env:
+        PACMAN_VERSION: 6.0.2
+      run: |
+        sudo git clone --depth 1 https://gitlab.manjaro.org/packages/core/pacman.git
+        pushd pacman
+        sudo wget https://sources.archlinux.org/other/pacman/pacman-${PACMAN_VERSION}.tar.xz
+        sudo tar -xvf pacman-${PACMAN_VERSION}.tar.xz
+        pushd pacman-${PACMAN_VERSION}
+        sudo patch -p1 -i ../pacman-sync-first-option.patch
+        sudo meson --prefix=/usr \
+                    --buildtype=plain \
+                    -Ddoc=disabled \
+                    -Ddoxygen=enabled \
+                    -Dscriptlet-shell=/usr/bin/bash \
+                    -Dldconfig=/usr/bin/ldconfig \
+                    build
+        sudo meson compile -C build
+        sudo meson install -C build
+        popd
+        sudo install -m644 pacman.conf /etc/pacman.conf
+        sudo install -m644 makepkg.conf /etc/
+        sudo mkdir -p /etc/pacman.d
+        echo "Server = ${{ inputs.build-mirror }}/${{ inputs.branch }}/\$repo/\$arch" | sudo tee /etc/pacman.d/mirrorlist
+        # install updpkgsums
+        sudo wget https://gitlab.archlinux.org/pacman/pacman-contrib/-/raw/master/src/updpkgsums.sh.in
+        sudo wget https://gitlab.archlinux.org/pacman/pacman-contrib/-/raw/master/configure.ac
+        contrib_ver=$(grep AC_INIT configure.ac | cut -d[ -f3 | cut -d] -f1)
+        sudo sed -i -e "s/@PACKAGE_VERSION@/${contrib_ver}/; s/@libmakepkgdir@/\/usr\/share\/makepkg/" updpkgsums.sh.in
+        sudo install -m755 updpkgsums.sh.in /usr/bin/updpkgsums
+        popd
+        sudo rm -rf pacman-${PACMAN_VERSION}
+    - id: install_boxit
+      shell: bash
+      run: |
+        sudo pacman -Syy boxit
+        sudo mkdir -p Boxit
+        # set branch
+        [[ ${input.branch} == stable ]] && repo=1
+        [[ ${input.branch} == testing ]] && repo=2
+        [[ ${input.branch} == unstable ]] && repo=3
+
+        pushd Boxit
+        printf "%s\n%s\n%s\n%s\n" "${input.build.mirror}" "${input.boxit-user}" "$input.boxit-passphrase" "$repo" | boxit init
+        
+        popd
+        sudo rm -rf manjaro-chrootbuild
+    - id: clone_repo
+      shell: bash
+      run: |
+        KERNEL=$(echo ${GITHUB_REPOSITORY} | cut -d'/' -f2)
+        if [[ "${{ inputs.realtime }}" == "true" ]]; then
+          sudo git clone https://mjr-build-server:${{ inputs.gitlab-pw }}@gitlab.manjaro.org/packages/community/realtime-kernels/${KERNEL}.git
+        else
+          sudo git clone https://mjr-build-server:${{ inputs.gitlab-pw }}@gitlab.manjaro.org/packages/core/${KERNEL}.git
+        fi
+        sudo git config --global user.name "Manjaro Build Server"
+        sudo git config --global user.email "build@manjaro.org"
+        echo "KERNEL=${KERNEL}" >>$GITHUB_ENV
+        if [[ "${{ inputs.bump-kernel }}" == "true" ]]; then
+          sudo chown -R ${UID}:${UID} ${KERNEL}
+          cd ${KERNEL}
+          repover=$(sudo pacman -Syi ${KERNEL} | grep Version | rev | cut -d' ' -f1 | rev | cut -d- -f1)
+          if [[ $repover == *rc* ]]; then
+            ver_maj=$(echo $repover | cut -d'r' -f1)
+            _rc=$(echo ${repover} | cut -d'c' -f2)
+            _rc_new=rc$((${_rc}+1))
+            sudo sed -i -e "/^_rc=/c\_rc=${_rc_new}" PKGBUILD
+            ver_new=${ver_maj}${_rc_new}
+          else
+            ver_maj=$(printf "%s.%s" "$(echo ${repover} | cut -d. -f1)" "$(echo ${repover} | cut -d. -f2)")
+            ver_min=$(echo ${repover} | cut -d. -f3)
+            ver_new=${ver_maj}.$((${ver_min}+1))
+          fi
+            sudo sed -i -e "/^pkgver=/c\pkgver=${ver_new}" PKGBUILD
+            sudo sed -i -e "/^pkgrel=/c\pkgrel=1" PKGBUILD
+            echo "update PKGBUILD"
+            updpkgsums
+            sudo git add PKGBUILD
+            sudo git commit -m"${ver_new}"
+            sudo git push
+            rm -rf src
+            cd ..
+        fi
+    - name: build_kernel
+      shell: bash
+      run: |
+        sudo chrootbuild -p ${{ env.KERNEL }} -b ${{ inputs.branch }}
+        if [ -z "${{ inputs.gpg-key }}" ] || [ -z "${{ inputs.gpg-passphrase }}" ]; then
+          echo "## gpg credentials not provided. Skip signing."
+        else
+          cat <(echo -e "${{ inputs.gpg-key }}" | base64 --decode) | gpg --batch --import &>/dev/null
+          for p in $(find $PWD -maxdepth 1 -regex '.*\.pkg\.tar\.\(xz\|zst\)'); do
+            echo "## signing $p"
+            gpg --pinentry-mode loopback --passphrase "${{ inputs.gpg-passphrase }}" --detach-sign ${p}
+          done
+        fi
+    - id: publish_kernel
+      shell: bash -O extglob {0}
+      run: |
+        _chrpkb=/var/lib/chrootbuild/build/${{ env.KERNEL }}/PKGBUILD
+        _ver=$(grep ^pkgver= ${_chrpkb} | cut -d'=' -f2)
+        _rel=$(grep ^pkgrel= ${_chrpkb} | cut -d'=' -f2)
+        _tag=${_ver}-${_rel}
+        sudo zip linux-${_tag}.zip ./*.zst ./*sig
+        echo ${{ github.token }} | gh auth login --with-token
+        gh release create ${_tag} --title ${_tag} --repo ${{ github.repository }} --notes "automated release" || echo "release already exists"
+        GITHUB_LINK=https://github.com/${GITHUB_REPOSITORY}/releases/download/${_tag}
+        gh release upload ${_tag} --repo ${GITHUB_REPOSITORY} --clobber ./linux-${_tag}.zip
+        echo "TAG=${_tag}" >>$GITHUB_ENV
+        echo "GITHUB_LINK=${GITHUB_LINK}" >>$GITHUB_ENV
+        sudo rm -rf /var/lib/chrootbuild
+    - name: create kernel btf
+      shell: bash -O extglob {0}
+      run: |
+        source ${{ env.KERNEL }}/PKGBUILD
+        for p in ${pkgname[@]}; do
+          name=$(find . -name ${p}-${{ env.TAG }}*.zst)
+          arch=$(echo ${name} | rev | cut -d- -f1 | rev | cut -d. -f1)
+          file=${p}-${{ env.TAG }}-${arch}
+          btf=${file}.yml
+          echo "sha256_pkg: $(sha256sum ${name} | cut -d' ' -f1)" > ${btf}
+          echo "sha256_sig: $(sha256sum ${name}.sig | cut -d' ' -f1)" >> ${btf}
+          echo "repository: core" >> ${btf}
+          echo "branch: ${{ inputs.branch }}" >> ${btf}
+          tar -czvf ${file}.tar ./${file}*.zst ./${file}*.sig ./${btf}
+        done
+    - name: get modules
+      shell: bash
+      run: |
+        sudo cp ${{ env.KERNEL }}/modules.list .
+        sudo sed -i -e '/^#/d' modules.list
+        sudo mkdir modules
+        pushd modules
+        for m in $(cat ../modules.list); do
+          if [[ "${{ inputs.realtime }}" == "true" ]]; then
+            sudo git clone "https://mjr-build-server:${{ inputs.gitlab-pw }}@gitlab.manjaro.org/packages/community/realtime-kernels/${{ env.KERNEL }}-extramodules/$m.git"
+          else
+            sudo git clone "https://mjr-build-server:${{ inputs.gitlab-pw }}@gitlab.manjaro.org/packages/extra/${{ env.KERNEL }}-extramodules/$m.git"
+          fi
+          if [[ ! "${{ inputs.bump-modules }}" == "none" ]]; then
+            _m=$m
+            [[ $m == "spl_zfs" ]] && _m=zfs
+            [[ $m == "virtualbox-modules" ]] && _m=virtualbox-host-modules
+            cd $m
+            repover=$(sudo pacman -Syi ${{ env.KERNEL }}-$_m | grep Version | rev | cut -d' ' -f1 | rev)
+            _reporel=$(echo $repover | cut -d- -f2)
+            _gitrel=$(grep "^pkgrel=" PKGBUILD | cut -d= -f2)
+            if [[ "${{ inputs.bump-modules }}" == "git" ]]; then
+              _rel=$_gitrel
+            elif [[ "${{ inputs.bump-modules }}" == "repo" ]]; then
+              _rel=$_reporel
+            fi
+            if [[ $_rel == 0.* ]]; then
+              if [[ ! ${{ env.TAG }} == *rc* ]]; then
+                _newrel=1
+              else
+                _rel=${_rel#*.}
+                _newrel=0.$((${_rel}+1))
+              fi
+            else
+              _newrel=$((${_rel}+1))
+            fi
+            _ver=$(echo $repover | cut -d- -f1)
+            _gitver=$(grep ^pkgver= PKGBUILD | cut -d= -f2)
+            [[ $(vercmp $_gitver $_ver) == 1 ]] && _newrel=1
+            sudo sed -i -e "/^pkgrel=/c\pkgrel=$_newrel" PKGBUILD
+            if [[ $_newrel != $_rel ]]; then
+              sudo git add PKGBUILD
+              sudo git commit -m"${_gitver}-$(grep "^pkgrel=" PKGBUILD | cut -d= -f2)"
+              sudo git push
+            fi
+            cd ..
+          fi
+        done
+        popd
+    - id: build_modules
+      shell: bash
+      run: |
+        sudo chrootbuild -K modules -i "${{ env.KERNEL }}-${{ env.TAG }}*.zst" -i "${{ env.KERNEL }}-headers*.zst" -b ${{ inputs.branch }}
+        sudo rm ./${{ env.KERNEL }}-${{ env.TAG }}-x86_64.pkg.tar.zst{,.sig} ./${{ env.KERNEL }}-headers-${{ env.TAG }}-x86_64.pkg.tar.zst{,.sig}
+        if [ -z "${{ inputs.gpg-key }}" ] || [ -z "${{ inputs.gpg-passphrase }}" ]; then 
+          echo "## gpg credentials not provided. Skip signing."
+        else
+          for p in $(find $PWD -maxdepth 1 -regex '.*\.pkg\.tar\.\(xz\|zst\)'); do
+            echo "## signing $p"
+            gpg --pinentry-mode loopback --passphrase "${{ inputs.gpg-passphrase }}" --detach-sign ${p}
+          done
+        fi
+    - name: create modules btf
+      shell: bash -O extglob {0}
+      run: |
+        for m in $(cat modules.list); do
+          source modules/${m}/PKGBUILD
+          m_ver=${pkgver}-${pkgrel}
+          for p in ${pkgname[@]}; do
+            name=$(find . -name ${p}-${m_ver}*.zst)
+            if [[ ! -z $name ]]; then
+              arch=$(echo ${name} | rev | cut -d- -f1 | rev | cut -d. -f1)
+              file=${p}-${m_ver}-${arch}
+              btf=${file}.yml
+              echo "sha256_pkg: $(sha256sum ${name} | cut -d' ' -f1)" > ${btf}
+              echo "sha256_sig: $(sha256sum ${name}.sig | cut -d' ' -f1)" >> ${btf}
+              echo "repository: extra" >> ${btf}
+              echo "branch: ${{ inputs.branch }}" >> ${btf}
+              tar -czvf ${file}.tar ./${file}*.zst ./${file}*.sig ./${btf}
+            fi
+          done
+        done
+    - id: publish_modules
+      shell: bash -O extglob {0}
+      run: |
+        sudo zip "linux-${{ env.TAG }}-extramodules.zip" ./*.zst ./*.sig
+        sudo zip "linux-${{ env.TAG }}-logs.zip" /home/runner/.chrootbuild-logs/*
+        echo ${{ github.token }} | gh auth login --with-token
+        GITHUB_LINK=${{ env.GITHUB_LINK }}
+        gh release upload ${{ env.TAG }} --repo ${GITHUB_REPOSITORY} --clobber ./linux-${{ env.TAG }}-extramodules.zip ./linux-${{ env.TAG }}-logs.zip # ./*.tar
+    - name: prepare ssh
+      shell: bash
+      run: |
+        mkdir -p /home/runner/.ssh
+        touch /home/runner/.ssh/github_actions
+        chmod 600 /home/runner/.ssh/github_actions
+        ssh-agent -a /tmp/ssh_agent.sock > /dev/null
+    - name: push to boxit
+      shell: bash -O extglob {0}
+      env:
+        SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+      run: |
+        if [ -z "${{ inputs.boxit-host }}" ] || [ -z "${{ inputs.boxit-target }}" ] || [ -z "${{ inputs.ssh-key }}" ]; then 
+          echo "## not all credentials given for boxit push"
+          exit 0
+        fi
+        ssh-keyscan -t rsa ${{ inputs.boxit-host }} >> /home/runner/.ssh/known_hosts
+        echo "${{ inputs.ssh-key }}" >> /home/runner/.ssh/github_actions
+        ssh-add /home/runner/.ssh/github_actions
+        rsync -vaPzz --stats -e ssh ./*tar ${{ inputs.boxit-target }}
