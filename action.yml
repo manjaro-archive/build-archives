@@ -76,16 +76,19 @@ runs:
     - id: install_boxit
       shell: bash
       run: |
-        sudo pacman -Syy boxit
-        sudo mkdir -p Boxit
         # set branch
-        [[ ${input.branch} == stable ]] && repo=1
-        [[ ${input.branch} == testing ]] && repo=2
-        [[ ${input.branch} == unstable ]] && repo=3
+        [[ ${inputs.branch} == stable ]] && repo=1
+        [[ ${inputs.branch} == testing ]] && repo=2
+        [[ ${inputs.branch} == unstable ]] && repo=3
+        #grab boxit
+        #sudo wget https://mirror.alpix.eu/manjaro/unstable/extra/x86_64/boxit-*-x86_64.pkg.tar.zst
+        sudo pacman -S boxit
+        sudo mkdir -p Boxit
+ 
 
         pushd Boxit
         printf "%s\n%s\n%s\n%s\n" "${input.build.mirror}" "${input.boxit-user}" "$input.boxit-passphrase" "$repo" | boxit init
-        
+
         popd
         sudo rm -rf manjaro-chrootbuild
     - id: clone_repo
