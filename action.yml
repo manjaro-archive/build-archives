@@ -18,6 +18,9 @@ inputs:
   boxit-target:
     description: 'boxit rsync target'
     required: true
+  branch:
+    description: 'branch repo'
+    required: true
 
 runs:
   using: "composite"
@@ -77,9 +80,9 @@ runs:
       shell: bash
       run: |
         # set branch
-        [[ ${inputs.branch} == stable ]] && repo=1
-        [[ ${inputs.branch} == testing ]] && repo=2
-        [[ ${inputs.branch} == unstable ]] && repo=3
+        [[ ${{ inputs.branch }} == stable ]] && repo=1
+        [[ ${{ inputs.branch }} == testing ]] && repo=2
+        [[ ${{ inputs.branch }} == unstable ]] && repo=3
         #grab boxit
         #sudo wget https://mirror.alpix.eu/manjaro/unstable/extra/x86_64/boxit-*-x86_64.pkg.tar.zst
         sudo pacman -S boxit
