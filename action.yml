@@ -85,7 +85,7 @@ runs:
         [[ ${{ inputs.branch }} == unstable ]] && repo=3
         #grab boxit
         #sudo wget https://mirror.alpix.eu/manjaro/unstable/extra/x86_64/boxit-*-x86_64.pkg.tar.zst
-        sudo pacman -S boxit
+        sudo pacman -Sy boxit
         sudo mkdir -p Boxit
  
 
