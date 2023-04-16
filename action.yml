@@ -84,12 +84,13 @@ runs:
         [[ ${{ inputs.branch }} == testing ]] && repo=2
         [[ ${{ inputs.branch }} == unstable ]] && repo=3
         #grab boxit
-        #sudo wget https://mirror.alpix.eu/manjaro/unstable/extra/x86_64/boxit-*-x86_64.pkg.tar.zst
-        sudo pacman -S boxit --noconfirm
         sudo mkdir -p Boxit
- 
-
         pushd Boxit
+        sudo git clone --depth 1 https://gitlab.manjaro.org/packages/extra/boxit
+        sudo cd boxit
+        sudo makepkg -sri
+        sudo cd ../
+        sudo cd Boxit
         printf "%s\n%s\n%s\n%s\n" "${input.build.mirror}" "${input.boxit-user}" "$input.boxit-passphrase" "$repo" | boxit init
 
         popd
