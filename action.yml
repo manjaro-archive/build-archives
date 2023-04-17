@@ -40,6 +40,7 @@ runs:
         libgpgme-dev \
         libssl-dev \
         zip \
+        qtbase5-dev \
         python3-pip
         sudo pip3 install meson
         sudo pip3 install ninja
@@ -83,14 +84,16 @@ runs:
         [[ ${{ inputs.branch }} == stable ]] && repo=1
         [[ ${{ inputs.branch }} == testing ]] && repo=2
         [[ ${{ inputs.branch }} == unstable ]] && repo=3
-        #grab boxit
-        sudo mkdir -p Boxit
-        pushd Boxit
-        sudo git clone --depth 1 https://gitlab.manjaro.org/packages/extra/boxit
-        sudo cd boxit
-        sudo makepkg -sri
-        sudo cd ../
-        sudo cd Boxit
+        #Build boxit
+        sudo git clone --depth 1 https://gitlab.manjaro.org/tools/maintenance-tools/boxit.git
+        pushd boxit
+        cd src
+        qmake-qt5
+        make sub-DBus
+        cp DBus/libDBus.a libDBus.a
+        make all
+        make install
+        
         printf "%s\n%s\n%s\n%s\n" "${input.build.mirror}" "${input.boxit-user}" "$input.boxit-passphrase" "$repo" | boxit init
 
         popd
