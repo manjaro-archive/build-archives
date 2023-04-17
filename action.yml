@@ -87,6 +87,7 @@ runs:
         #Build boxit
         sudo git clone --depth 1 https://gitlab.manjaro.org/tools/maintenance-tools/boxit.git
         pushd boxit
+        pushd boxit
         pushd src
         qmake-qt5
         make sub-DBus
