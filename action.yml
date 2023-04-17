@@ -40,7 +40,7 @@ runs:
         libgpgme-dev \
         libssl-dev \
         zip \
-        qtbase5-dev \
+        qt5-default \
         python3-pip
         sudo pip3 install meson
         sudo pip3 install ninja
