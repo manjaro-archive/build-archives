@@ -87,13 +87,14 @@ runs:
         #Build boxit
         sudo git clone --depth 1 https://gitlab.manjaro.org/tools/maintenance-tools/boxit.git
         pushd boxit
-        cd src
+        pushd src
         qmake-qt5
         make sub-DBus
         cp DBus/libDBus.a libDBus.a
         make all
         make install
-        
+        popd
+
         printf "%s\n%s\n%s\n%s\n" "${input.build.mirror}" "${input.boxit-user}" "$input.boxit-passphrase" "$repo" | boxit init
 
         popd
