@@ -41,6 +41,7 @@ runs:
         libssl-dev \
         zip \
         qt5-qmake \
+        qtbase5-dev \
         python3-pip
         sudo pip3 install meson
         sudo pip3 install ninja
