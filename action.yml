@@ -103,11 +103,12 @@ runs:
         popd
         sudo echo
         sudo echo 'Build Boxit Done'
+        popd
         sudo echo
         sudo ls 
         sudo echo
 
-        printf "%s\n%s\n%s\n%s\n" "${inputs.build-mirror}" "${inputs.boxit-user}" "$inputs.boxit-passphrase" "$repo" | boxit init
+        printf "%s\n%s\n%s\n%s\n" "${{ inputs.build-mirror }}" "${{ inputs.boxit-user }}" "${{ inputs.boxit-passphrase }}" "$repo" | boxit init
 
         popd
     - id: clone_repo
