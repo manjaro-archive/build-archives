@@ -86,10 +86,10 @@ runs:
         [[ ${{ inputs.branch }} == testing ]] && repo=2
         [[ ${{ inputs.branch }} == unstable ]] && repo=3
 
-        echo
-        echo $repo
-        echo
-        
+        sudo echo
+        sudo echo $repo
+        sudo echo
+
         #Build boxit
         sudo git clone --depth 1 https://gitlab.manjaro.org/tools/maintenance-tools/boxit.git
         pushd boxit
@@ -101,11 +101,15 @@ runs:
         sudo make all
         sudo make install
         popd
+        sudo echo
+        sudo echo 'Build Boxit Done'
+        sudo echo
+        ls *.*
+        sudo echo
 
-        printf "%s\n%s\n%s\n%s\n" "${inputs.build.mirror}" "${inputs.boxit-user}" "$inputs.boxit-passphrase" "$repo" | boxit init
+        printf "%s\n%s\n%s\n%s\n" "${inputs.build-mirror}" "${inputs.boxit-user}" "$inputs.boxit-passphrase" "$repo" | boxit init
 
         popd
-        #sudo rm -rf manjaro-chrootbuild
     - id: clone_repo
       shell: bash
       run: |
