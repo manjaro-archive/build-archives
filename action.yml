@@ -89,17 +89,17 @@ runs:
         pushd boxit
         pushd boxit
         pushd src
-        qmake-qt5
-        make sub-DBus
-        cp DBus/libDBus.a libDBus.a
-        make all
-        make install
+        sudo qmake-qt5
+        sudo make sub-DBus
+        sudo cp DBus/libDBus.a libDBus.a
+        sudo make all
+        sudo make install
         popd
 
         printf "%s\n%s\n%s\n%s\n" "${input.build.mirror}" "${input.boxit-user}" "$input.boxit-passphrase" "$repo" | boxit init
 
         popd
-        sudo rm -rf manjaro-chrootbuild
+        #sudo rm -rf manjaro-chrootbuild
     - id: clone_repo
       shell: bash
       run: |
