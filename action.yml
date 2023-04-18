@@ -3,9 +3,8 @@ description: 'Builds Manjaro Archives'
 
 inputs:
   build-mirror:
-    description: 'mirror to be used for list overlay'
+    description: 'server to be used for list overlay'
     required: true
-    default: 'https://mirrors.manjaro.org/repo'
   ssh-key:
     description: 'ssh secret key'
     required: true
@@ -104,11 +103,19 @@ runs:
         sudo echo
         sudo echo 'Build Boxit Done'
         popd
+        popd
+        popd
+        sudo mkdir -p Boxit
+        popd
         sudo echo
         sudo ls 
         sudo echo
 
-        printf "%s\n%s\n%s\n%s\n" "${{ inputs.build-mirror }}" "${{ inputs.boxit-user }}" "${{ inputs.boxit-passphrase }}" "$repo" | boxit init
+        printf "%s\n%s\n%s\n%s\n" "${{ inputs.build-mirror }}" "${{ inputs.boxit-user }}" "${{ inputs.boxit-passphrase }}" "$repo" | sudo boxit init
+
+        sudo echo
+        sudo ls 
+        sudo echo
 
         popd
     - id: clone_repo
