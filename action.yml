@@ -40,7 +40,7 @@ runs:
         libgpgme-dev \
         libssl-dev \
         zip \
-        qt5-default \
+        qt5-qmake \
         python3-pip
         sudo pip3 install meson
         sudo pip3 install ninja
@@ -89,7 +89,7 @@ runs:
         pushd boxit
         pushd boxit
         pushd src
-        sudo qmake-qt5
+        sudo qmake
         sudo make sub-DBus
         sudo cp DBus/libDBus.a libDBus.a
         sudo make all
