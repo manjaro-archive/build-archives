@@ -104,13 +104,9 @@ runs:
         sudo echo 'Build Boxit Done'
         popd
         popd
-        popd
         sudo mkdir -p Boxit
         popd
-        sudo echo
-        sudo ls 
-        sudo echo
-
+        
         printf "%s\n%s\n%s\n%s\n" "${{ inputs.build-mirror }}" "${{ inputs.boxit-user }}" "${{ inputs.boxit-passphrase }}" "$repo" | sudo boxit init
 
         sudo echo
