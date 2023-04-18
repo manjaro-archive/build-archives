@@ -104,7 +104,7 @@ runs:
         sudo echo
         sudo echo 'Build Boxit Done'
         sudo echo
-        ls *.*
+        sudo ls *.*
         sudo echo
 
         printf "%s\n%s\n%s\n%s\n" "${inputs.build-mirror}" "${inputs.boxit-user}" "$inputs.boxit-passphrase" "$repo" | boxit init
