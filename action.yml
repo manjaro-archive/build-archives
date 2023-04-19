@@ -11,11 +11,11 @@ inputs:
   ssh-passphrase:
     description: 'passphrase for ssh key'
     required: true
-  boxit-host:
-    description: 'boxit login address'
+  boxit-user:
+    description: 'boxit login name'
     required: true
-  boxit-target:
-    description: 'boxit rsync target'
+  boxit-passphrase:
+    description: 'boxit passphrase'
     required: true
   branch:
     description: 'branch repo'
@@ -73,12 +73,12 @@ runs:
         pushd Boxit
         # Overlay packages
         printf "%s\n%s\n%s\n%s\n" "${{ inputs.build-mirror }}" "${{ inputs.boxit-user }}" "${{ inputs.boxit-passphrase }}" "$repo" | sudo boxit init
-
-        sudo echo
-        sudo ls 
-        sudo echo
+        repos=( community core extra multilib kde-unstable )
+        for k in ${repos[@]}; do
+          (ls -d ~/Boxit/${{ inputs.branch }}/$k/x86_64/*.* | cut -d '/' -f6-) >> sudo ${{ inputs.branch }}-repo-list    
+        done
+        cat ${{ inputs.branch }}-repo-list
         popd
-        
     - id: publish_modules
       shell: bash -O extglob {0}
       run: |
