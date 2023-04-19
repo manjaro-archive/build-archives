@@ -60,8 +60,7 @@ runs:
         sudo echo 'Build Boxit Done'
         popd
         popd
-        sudo mkdir -p Boxit
-        pushd Boxit
+        
     - id: create_list_pkgs
       shell: bash
       run: |
@@ -69,11 +68,10 @@ runs:
         [[ ${{ inputs.branch }} == stable ]] && repo=1
         [[ ${{ inputs.branch }} == testing ]] && repo=2
         [[ ${{ inputs.branch }} == unstable ]] && repo=3
-
-        sudo echo
-        sudo echo $repo
-        sudo echo
-
+        # create Boxit working dir
+        sudo mkdir -p Boxit
+        pushd Boxit
+        # Overlay packages
         printf "%s\n%s\n%s\n%s\n" "${{ inputs.build-mirror }}" "${{ inputs.boxit-user }}" "${{ inputs.boxit-passphrase }}" "$repo" | sudo boxit init
 
         sudo echo
