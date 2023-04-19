@@ -75,7 +75,7 @@ runs:
         printf "%s\n%s\n%s\n%s\n" "${{ inputs.build-mirror }}" "${{ inputs.boxit-user }}" "${{ inputs.boxit-passphrase }}" "$repo" | sudo boxit init
         repos=( community core extra multilib kde-unstable )
         for k in ${repos[@]}; do
-          (ls -d ~/Boxit/${{ inputs.branch }}/$k/x86_64/*.* | cut -d '/' -f6-) >> sudo ${{ inputs.branch }}-repo-list    
+          (ls -d ${{ inputs.branch }}/$k/x86_64/*.* | cut -d '/' -f4-) >> sudo ${{ inputs.branch }}-repo-list    
         done
         cat ${{ inputs.branch }}-repo-list
         popd
