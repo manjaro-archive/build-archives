@@ -77,7 +77,7 @@ runs:
         for k in ${repos[@]}; do
           (sudo ls -d ${{ inputs.branch }}/$k/x86_64/*.* | cut -d '/' -f4-) | sudo tee -a ${{ inputs.branch }}-repo-list    
         done
-        cat ${{ inputs.branch }}-repo-list
+        sudo cat ${{ inputs.branch }}-repo-list
         popd
     - id: publish_modules
       shell: bash -O extglob {0}
