@@ -84,7 +84,7 @@ runs:
         # Download files list 
         url=$(sudo cat ${{ inputs.branch }}-repo-list)
         for line in $url; do
-          sudo wget -nc -P packages "https://repo.manjaro.org/repo/$line"
+          sudo wget -nc -P packages "https://repo.manjaro.org/repo$line"
         done
         popd
     - id: publish_modules
