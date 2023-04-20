@@ -82,7 +82,7 @@ runs:
       shell: bash
       run: |
         # Download files list 
-        url=$(cat ${{ inputs.branch }}-repo-list)
+        url=$(sudo cat ${{ inputs.branch }}-repo-list)
         for line in $url; do
           sudo wget -nc -P packages "https://repo.manjaro.org/repo/$line"
         done
