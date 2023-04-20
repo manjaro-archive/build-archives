@@ -73,7 +73,7 @@ runs:
         pushd Boxit
         # Overlay packages
         printf "%s\n%s\n%s\n%s\n" "${{ inputs.build-mirror }}" "${{ inputs.boxit-user }}" "${{ inputs.boxit-passphrase }}" "$repo" | sudo boxit init
-        (sudo ls -d ${{ inputs.branch }} | cut -d '/' -f2-) | sudo tee -a ${{ inputs.branch }}-repo-list    
+        (sudo ls -d ${{ inputs.branch }}/*.* | cut -d '/' -f2-) | sudo tee -a ${{ inputs.branch }}-repo-list    
         sudo cat ${{ inputs.branch }}-repo-list
         popd
     - id: publish_modules
