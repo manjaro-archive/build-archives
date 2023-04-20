@@ -78,6 +78,7 @@ runs:
         find . -path ./.boxit -prune -o -name '*.*' -print | cut -d '.' -f2- | sudo tee -a ${{ inputs.branch }}-repo-list > /dev/null
         sudo sed -i '/^$/d' ${{ inputs.branch }}-repo-list
         sudo cat ${{ inputs.branch }}-repo-list
+    
     - id: download_pkgs
       shell: bash
       run: |
