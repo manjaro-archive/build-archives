@@ -45,7 +45,7 @@ runs:
     - id: install_boxit
       shell: bash
       run: |
-        #Build boxit
+        #Build boxit package
         sudo git clone --depth 1 https://gitlab.manjaro.org/tools/maintenance-tools/boxit.git
         pushd boxit
         pushd boxit
@@ -64,18 +64,28 @@ runs:
     - id: create_list_pkgs
       shell: bash
       run: |
-        # set branch
+        # Grab list of overlay 
         [[ ${{ inputs.branch }} == stable ]] && repo=1
         [[ ${{ inputs.branch }} == testing ]] && repo=2
         [[ ${{ inputs.branch }} == unstable ]] && repo=3
+        
         # create Boxit working dir
         sudo mkdir -p Boxit
         pushd Boxit
+        
         # Overlay packages
         printf "%s\n%s\n%s\n%s\n" "${{ inputs.build-mirror }}" "${{ inputs.boxit-user }}" "${{ inputs.boxit-passphrase }}" "$repo" | sudo boxit init
         find . -path ./.boxit -prune -o -name '*.*' -print | cut -d '.' -f2- | sudo tee -a ${{ inputs.branch }}-repo-list > /dev/null
         sudo sed -i '/^$/d' ${{ inputs.branch }}-repo-list
         sudo cat ${{ inputs.branch }}-repo-list
+    - id: download_pkgs
+      shell: bash
+      run: |
+        # Download files list 
+        url=$(cat ${{ inputs.branch }}-repo-list)
+        for line in $url; do
+          sudo wget -nc -P packages "https://repo.manjaro.org/repo/$line"
+        done
         popd
     - id: publish_modules
       shell: bash -O extglob {0}
