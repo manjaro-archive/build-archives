@@ -104,10 +104,10 @@ runs:
     #- name: prepare_ssh
       shell: bash
       run: |
-        sudo mkdir -p /home/runner/.ssh
-        sudo touch /home/runner/.ssh/github_actions
-        sudo chmod 600 /home/runner/.ssh/github_actions
-        sudo ssh-agent -a /tmp/ssh_agent.sock > /dev/null
+        mkdir -p /home/runner/.ssh
+        touch /home/runner/.ssh/github_actions
+        chmod 600 /home/runner/.ssh/github_actions
+        ssh-agent -a /tmp/ssh_agent.sock > /dev/null
     
     - id: upload_pkgs
     #- name: push_to_server
@@ -116,11 +116,11 @@ runs:
         SSH_AUTH_SOCK: /tmp/ssh_agent.sock
       run: |
         if [ -z "${{ inputs.ssh-key }}" ]; then 
-        sudo echo "## not all credentials given for server"
+        echo "## not all credentials given for server"
           exit 0
         fi
-        sudossh-keyscan -t ed25519 ${{ inputs.server-host }} >> /home/runner/.ssh/known_hosts
-        sudo echo "${{ inputs.ssh-key }}" >> /home/runner/.ssh/github_actions
-        sudo ssh-add /home/runner/.ssh/github_actions
+        ssh-keyscan -t ed25519 ${{ inputs.server-host }} >> /home/runner/.ssh/known_hosts
+        echo "${{ inputs.ssh-key }}" >> /home/runner/.ssh/github_actions
+        ssh-add /home/runner/.ssh/github_actions
         #rsync -vaPzz --stats -e ssh ./*tar ${{ inputs.boxit-target }}
-        sudo scp ${{ inputs.branch }}-repo-list ${{ inputs.host-user }}@${{ inputs.remote-host }}:/${{ inputs.remote-path }}/${{ inputs.branch }}-archive/.${{ inputs.branch }}-repo-list
+        scp ${{ inputs.branch }}-repo-list ${{ inputs.host-user }}@${{ inputs.remote-host }}:/${{ inputs.remote-path }}/${{ inputs.branch }}-archive/.${{ inputs.branch }}-repo-list
