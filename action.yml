@@ -101,7 +101,7 @@ runs:
         #done
     
     - id: ssh_config
-    - name: prepare_ssh
+    #- name: prepare_ssh
       shell: bash
       run: |
         mkdir -p /home/runner/.ssh
@@ -110,7 +110,7 @@ runs:
         ssh-agent -a /tmp/ssh_agent.sock > /dev/null
     
     - id: upload_pkgs
-    - name: push_to_server
+    #- name: push_to_server
       shell: bash -O extglob {0}
       env:
         SSH_AUTH_SOCK: /tmp/ssh_agent.sock
