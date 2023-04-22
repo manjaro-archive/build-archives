@@ -94,15 +94,14 @@ runs:
       run: |
         # Download files list 
         cd /home/runner/work/${{ inputs.branch }}-archive/${{ inputs.branch }}-archive/Boxit        
-        url=$(sudo cat ${{ inputs.branch }}-repo-list)
-        for line in $url; do
-          sudo wget -nc -P packages "https://repo.manjaro.org/repo$line"
-        done
-        popd
+        #url=$(sudo cat ${{ inputs.branch }}-repo-list)
+        #for line in $url; do
+        #  sudo wget -nc -P packages "https://repo.manjaro.org/repo$line"
+        #done
     
     - id: upload_pkgs
-    - name: prepare ssh
       shell: bash
+    - name: prepare ssh
       run: |
         mkdir -p /home/runner/.ssh
         touch /home/runner/.ssh/github_actions
