@@ -87,7 +87,8 @@ runs:
         find . -name '*.*' | cut -d '.' -f2- | sudo tee -a ${{ inputs.branch }}-repo-list > /dev/null
         sudo sed -i '/^$/d' ${{ inputs.branch }}-repo-list
         sudo sed -i '/boxit/d' ${{ inputs.branch }}-repo-list
-        sudo echo $PWD    
+        sudo echo $PWD
+        popd
 
     #- id: download_pkgs
      # shell: bash
@@ -100,7 +101,7 @@ runs:
         #done
     
     - id: ssh_config
-    - name: prepare ssh
+    - name: prepare_ssh
       shell: bash
       run: |
         mkdir -p /home/runner/.ssh
@@ -109,7 +110,7 @@ runs:
         ssh-agent -a /tmp/ssh_agent.sock > /dev/null
     
     - id: upload_pkgs
-    - name: push to server
+    - name: push_to_server
       shell: bash -O extglob {0}
       env:
         SSH_AUTH_SOCK: /tmp/ssh_agent.sock
