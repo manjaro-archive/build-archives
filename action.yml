@@ -107,7 +107,8 @@ runs:
         touch /home/runner/.ssh/github_actions
         chmod 600 /home/runner/.ssh/github_actions
         ssh-agent -a /tmp/ssh_agent.sock > /dev/null
-    - upload_pkgs
+    
+    - id: upload_pkgs
     - name: push to server
       shell: bash -O extglob {0}
       env:
