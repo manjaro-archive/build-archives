@@ -93,7 +93,7 @@ runs:
      # shell: bash
      # run: |
         # Download files list 
-        cd /home/runner/work/${{ inputs.branch }}-archive/${{ inputs.branch }}-archive/Boxit        
+        #cd /home/runner/work/${{ inputs.branch }}-archive/${{ inputs.branch }}-archive/Boxit        
         #url=$(sudo cat ${{ inputs.branch }}-repo-list)
         #for line in $url; do
         #  sudo wget -nc -P packages "https://repo.manjaro.org/repo$line"
