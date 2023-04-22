@@ -89,9 +89,9 @@ runs:
         sudo sed -i '/boxit/d' ${{ inputs.branch }}-repo-list
         sudo echo $PWD    
 
-    - id: download_pkgs
-      shell: bash
-      run: |
+    #- id: download_pkgs
+     # shell: bash
+     # run: |
         # Download files list 
         cd /home/runner/work/${{ inputs.branch }}-archive/${{ inputs.branch }}-archive/Boxit        
         #url=$(sudo cat ${{ inputs.branch }}-repo-list)
