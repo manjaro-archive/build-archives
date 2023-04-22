@@ -100,8 +100,8 @@ runs:
         #done
     
     - id: upload_pkgs
-      shell: bash
     - name: prepare ssh
+      shell: bash
       run: |
         mkdir -p /home/runner/.ssh
         touch /home/runner/.ssh/github_actions
