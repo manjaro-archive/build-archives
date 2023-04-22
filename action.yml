@@ -8,9 +8,6 @@ inputs:
   ssh-key:
     description: 'ssh secret key'
     required: true
-  ssh-passphrase:
-    description: 'passphrase for ssh key'
-    required: true
   boxit-user:
     description: 'boxit login name'
     required: true
@@ -19,6 +16,18 @@ inputs:
     required: true
   branch:
     description: 'branch repo'
+    required: true
+  server-host:
+    description: 'server IP'
+    required: true
+  remote-host:
+    description: 'host server'
+    required: true
+  remote-path:
+    description: 'path into server'
+    required: true
+  host-user:
+    description: 'server user name'
     required: true
 
 runs:
@@ -89,14 +98,8 @@ runs:
           sudo wget -nc -P packages "https://repo.manjaro.org/repo$line"
         done
         popd
-    - id: publish_modules
-      shell: bash -O extglob {0}
-      run: |
-        sudo zip "linux-${{ env.TAG }}-extramodules.zip" ./*.zst ./*.sig
-        sudo zip "linux-${{ env.TAG }}-logs.zip" /home/runner/.chrootbuild-logs/*
-        echo ${{ github.token }} | gh auth login --with-token
-        GITHUB_LINK=${{ env.GITHUB_LINK }}
-        gh release upload ${{ env.TAG }} --repo ${GITHUB_REPOSITORY} --clobber ./linux-${{ env.TAG }}-extramodules.zip ./linux-${{ env.TAG }}-logs.zip # ./*.tar
+    
+    - id: upload_pkgs
     - name: prepare ssh
       shell: bash
       run: |
@@ -104,16 +107,17 @@ runs:
         touch /home/runner/.ssh/github_actions
         chmod 600 /home/runner/.ssh/github_actions
         ssh-agent -a /tmp/ssh_agent.sock > /dev/null
-    - name: push to boxit
+    - name: push to server
       shell: bash -O extglob {0}
       env:
         SSH_AUTH_SOCK: /tmp/ssh_agent.sock
       run: |
-        if [ -z "${{ inputs.boxit-host }}" ] || [ -z "${{ inputs.boxit-target }}" ] || [ -z "${{ inputs.ssh-key }}" ]; then 
-          echo "## not all credentials given for boxit push"
+        if [ -z "${{ inputs.ssh-key }}" ]; then 
+          echo "## not all credentials given for server"
           exit 0
         fi
-        ssh-keyscan -t rsa ${{ inputs.boxit-host }} >> /home/runner/.ssh/known_hosts
+        ssh-keyscan -t ed25519 ${{ inputs.server-host }} >> /home/runner/.ssh/known_hosts
         echo "${{ inputs.ssh-key }}" >> /home/runner/.ssh/github_actions
         ssh-add /home/runner/.ssh/github_actions
-        rsync -vaPzz --stats -e ssh ./*tar ${{ inputs.boxit-target }}
+        #rsync -vaPzz --stats -e ssh ./*tar ${{ inputs.boxit-target }}
+        scp ${{ inputs.branch }}-repo-list ${{ inputs.host-user }}@${{ inputs.remote-host }}:/${{ inputs.remote-path }}/${{ inputs.branch }}-archive/.${{ inputs.branch }}-repo-list
