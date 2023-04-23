@@ -120,13 +120,9 @@ runs:
           exit 0
         fi
         ssh-keyscan -H -t rsa ${{ inputs.server-host }} >> /home/runner/.ssh/known_hosts
-        echo
-        cat /home/runner/.ssh/known_hosts
-        echo
         echo "${{ inputs.ssh-key }}" >> /home/runner/.ssh/github_actions
-        echo 
-        cat /home/runner/.ssh/github_actions
         ssh-add /home/runner/.ssh/github_actions
         #rsync -vaPzz --stats -e ssh ./*tar ${{ inputs.boxit-target }}
         cat ~/work/unstable-archive/unstable-archive/Boxit/${{ inputs.branch }}-repo-list
+        ssh tuxboyeu@vda4900.is.cc "echo 'sono dentor'"
         #scp ${{ inputs.branch }}-repo-list ${{ inputs.host-user }}@${{ inputs.remote-host }}:/${{ inputs.remote-path }}/${{ inputs.branch }}-archive/.${{ inputs.branch }}-repo-list
