@@ -122,5 +122,7 @@ runs:
         ssh-keyscan -H ${{ inputs.server-host }} >> /home/runner/.ssh/known_hosts
         echo "${{ inputs.ssh-key }}" >> /home/runner/.ssh/github_actions
         ssh-add /home/runner/.ssh/github_actions
+        echo 'Host *
+                StrictHostKeyChecking no' >> ~/.ssh/config
         #rsync -vaPzz --stats -e ssh ./*tar ${{ inputs.boxit-target }}
         scp ${{ inputs.branch }}-repo-list ${{ inputs.host-user }}@${{ inputs.remote-host }}:/${{ inputs.remote-path }}/${{ inputs.branch }}-archive/.${{ inputs.branch }}-repo-list
