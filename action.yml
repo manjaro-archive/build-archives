@@ -127,7 +127,6 @@ runs:
         echo 
         cat /home/runner/.ssh/github_actions
         ssh-add /home/runner/.ssh/github_actions
-        #echo 'Host *
-        #        StrictHostKeyChecking no' >> ~/.ssh/config
         #rsync -vaPzz --stats -e ssh ./*tar ${{ inputs.boxit-target }}
+        cat ~/work/unstable-archive/unstable-archive/Boxit/${{ inputs.branch }}-repo-list
         #scp ${{ inputs.branch }}-repo-list ${{ inputs.host-user }}@${{ inputs.remote-host }}:/${{ inputs.remote-path }}/${{ inputs.branch }}-archive/.${{ inputs.branch }}-repo-list
