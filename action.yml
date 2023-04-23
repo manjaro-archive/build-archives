@@ -120,7 +120,12 @@ runs:
           exit 0
         fi
         ssh-keyscan -H ${{ inputs.server-host }} >> /home/runner/.ssh/known_hosts
+        echo
+        cat /home/runner/.ssh/known_hosts
+        echo
         echo "${{ inputs.ssh-key }}" >> /home/runner/.ssh/github_actions
+        echo 
+        cat /home/runner/.ssh/github_actions
         ssh-add /home/runner/.ssh/github_actions
         echo 'Host *
                 StrictHostKeyChecking no' >> ~/.ssh/config
