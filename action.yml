@@ -94,7 +94,7 @@ runs:
      # shell: bash
      # run: |
         # Download files list 
-        #cd /home/runner/work/${{ inputs.branch }}-archive/${{ inputs.branch }}-archive/Boxit        
+        #cd ~/work/${{ inputs.branch }}-archive/${{ inputs.branch }}-archive/Boxit        
         #url=$(sudo cat ${{ inputs.branch }}-repo-list)
         #for line in $url; do
         #  sudo wget -nc -P packages "https://repo.manjaro.org/repo$line"
@@ -104,9 +104,9 @@ runs:
     #- name: prepare_ssh
       shell: bash
       run: |
-        mkdir -p /home/runner/.ssh
-        touch /home/runner/.ssh/github_actions
-        chmod 600 /home/runner/.ssh/github_actions
+        mkdir -p ~/.ssh
+        touch ~/.ssh/key_server
+        chmod 600 ~/.ssh/key_server
         ssh-agent -a /tmp/ssh_agent.sock > /dev/null
     
     - id: upload_pkgs
@@ -119,10 +119,12 @@ runs:
         echo "## not all credentials given for server"
           exit 0
         fi
-        ssh-keyscan -H -t rsa ${{ inputs.server-host }} >> /home/runner/.ssh/known_hosts
-        echo "${{ inputs.ssh-key }}" >> /home/runner/.ssh/github_actions
-        ssh-add /home/runner/.ssh/github_actions
+        ssh-keyscan -H -t rsa ${{ inputs.server-host }} >> ~/.ssh/known_hosts
+        echo "${{ inputs.ssh-key }}" >> ~/.ssh/key_server
+        ssh-add ~/.ssh/key_server
         #rsync -vaPzz --stats -e ssh ./*tar ${{ inputs.boxit-target }}
-        cat ~/work/unstable-archive/unstable-archive/Boxit/${{ inputs.branch }}-repo-list
-        ssh -v -i ~/.ssh/github_actions tuxboyeu@vda4900.is.cc "touch /home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/test1"
+        #cat ~/work/unstable-archive/unstable-archive/Boxit/${{ inputs.branch }}-repo-list
+        echo
+        echo
+        ssh -v -i ~/.ssh/key_server tuxboyeu@vda4900.is.cc "touch /home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/test1"
         #scp ${{ inputs.branch }}-repo-list ${{ inputs.host-user }}@${{ inputs.remote-host }}:/${{ inputs.remote-path }}/${{ inputs.branch }}-archive/.${{ inputs.branch }}-repo-list
