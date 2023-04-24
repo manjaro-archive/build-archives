@@ -124,5 +124,5 @@ runs:
         ssh-add /home/runner/.ssh/github_actions
         #rsync -vaPzz --stats -e ssh ./*tar ${{ inputs.boxit-target }}
         cat ~/work/unstable-archive/unstable-archive/Boxit/${{ inputs.branch }}-repo-list
-        ssh -v -i ~/.ssh/github_actions tuxboyeu@vda4900.is.cc "touch /${{ inputs.remote-path }}/${{ inputs.branch }}-archive/test"
+        ssh -v -i ~/.ssh/github_actions tuxboyeu@vda4900.is.cc "touch /home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/test1"
         #scp ${{ inputs.branch }}-repo-list ${{ inputs.host-user }}@${{ inputs.remote-host }}:/${{ inputs.remote-path }}/${{ inputs.branch }}-archive/.${{ inputs.branch }}-repo-list
