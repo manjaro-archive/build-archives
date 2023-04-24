@@ -126,7 +126,7 @@ runs:
         #cat ~/work/unstable-archive/unstable-archive/Boxit/${{ inputs.branch }}-repo-list
         echo
         echo
-        echo '*' > ~/.ssh/config
+        echo 'HOST *' > ~/.ssh/config
         echo 'StrictHostKeyChecking no' >> ~/.ssh/config
         ssh -v -i ~/.ssh/key_server tuxboyeu@vda4900.is.cc "touch /home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/test1"
         #scp ${{ inputs.branch }}-repo-list ${{ inputs.host-user }}@${{ inputs.remote-host }}:/${{ inputs.remote-path }}/${{ inputs.branch }}-archive/.${{ inputs.branch }}-repo-list
