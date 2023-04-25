@@ -25,7 +25,7 @@ inputs:
     required: true
   remote-path:
     description: 'path into server'
-    required: true
+    required: false
   host-user:
     description: 'server user name'
     required: true
@@ -90,16 +90,6 @@ runs:
         sudo echo $PWD
         popd
 
-    #- id: download_pkgs
-     # shell: bash
-     # run: |
-        # Download files list 
-        #cd ~/work/${{ inputs.branch }}-archive/${{ inputs.branch }}-archive/Boxit        
-        #url=$(sudo cat ${{ inputs.branch }}-repo-list)
-        #for line in $url; do
-        #  sudo wget -nc -P packages "https://repo.manjaro.org/repo$line"
-        #done
-    
     - id: ssh_config
     #- name: prepare_ssh
       shell: bash
@@ -122,10 +112,18 @@ runs:
         ssh-keyscan -H -t rsa ${{ inputs.server-host }} >> ~/.ssh/known_hosts
         echo "${{ inputs.ssh-key }}" >> ~/.ssh/key_server
         ssh-add ~/.ssh/key_server
-        #rsync -vaPzz --stats -e ssh ./*tar ${{ inputs.boxit-target }}
         cat ~/work/unstable-archive/unstable-archive/Boxit/${{ inputs.branch }}-repo-list > ~/list
         echo "Host *" > ~/.ssh/config
         echo "IdentityFile ~/.ssh/key_server" >> ~/.ssh/config
         echo "StrictHostKeyChecking no" >> ~/.ssh/config
         #ssh -v tuxboyeu@vda4900.is.cc "touch /home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/test2"
         rsync -vazz --stats -e 'ssh' ~/list ${{ inputs.host-user }}@vda4900.is.cc:/home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/"${{ inputs.branch }}-archive/${{ inputs.branch }}-list"
+
+        ssh ${{ inputs.host-user }}@vda4900.is.cc << EOF
+          cd /home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/"${{ inputs.branch }}-archive
+          url=$(cat ${{ inputs.branch }}-list)
+          for line in $url; do
+            wget -nc "https://repo.manjaro.org/repo/${{ inputs.branch }}/$line"
+          done
+          echo 'All files are upload into server'
+          EOF
