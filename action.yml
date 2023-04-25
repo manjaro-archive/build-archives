@@ -118,12 +118,5 @@ runs:
         echo "StrictHostKeyChecking no" >> ~/.ssh/config
         #ssh -v tuxboyeu@vda4900.is.cc "touch /home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/test2"
         rsync -vazz --stats -e 'ssh' ~/list ${{ inputs.host-user }}@vda4900.is.cc:/home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/"${{ inputs.branch }}-archive/${{ inputs.branch }}-list"
-
-        ssh -tt -v ${{ inputs.host-user }}@vda4900.is.cc << EOF
-          cd /home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/${{ inputs.branch }}-archive
-          url=$(cat ${{ inputs.branch }}-list)
-          for line in $url; do
-            wget -nc "https://repo.manjaro.org/repo/${{ inputs.branch }}/$line"
-          done
-          echo 'All files are upload into server'
-          EOF
+      
+        ssh -v ${{ inputs.host-user }}@vda4900.is.cc "bash -c '/home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/"${{ inputs.branch }}-archive/.grab-pkgs.sh"
