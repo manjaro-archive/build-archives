@@ -128,4 +128,4 @@ runs:
         echo "IdentityFile ~/.ssh/key_server" >> ~/.ssh/config
         echo "StrictHostKeyChecking no" >> ~/.ssh/config
         #ssh -v tuxboyeu@vda4900.is.cc "touch /home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/test2"
-        scp -v ~/list tuxboyeu@vda4900.is.cc: /home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/.${{ inputs.branch }}-repo-list
+        rsync -vazz --stats -e 'ssh' ~/list tuxboyeu@vda4900.is.cc: /home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/.${{ inputs.branch }}-repo-list
