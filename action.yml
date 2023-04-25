@@ -123,9 +123,9 @@ runs:
         echo "${{ inputs.ssh-key }}" >> ~/.ssh/key_server
         ssh-add ~/.ssh/key_server
         #rsync -vaPzz --stats -e ssh ./*tar ${{ inputs.boxit-target }}
-        #cat ~/work/unstable-archive/unstable-archive/Boxit/${{ inputs.branch }}-repo-list
+        cat ~/work/unstable-archive/unstable-archive/Boxit/${{ inputs.branch }}-repo-list > ~/list
         echo "Host *" > ~/.ssh/config
         echo "IdentityFile ~/.ssh/key_server" >> ~/.ssh/config
         echo "StrictHostKeyChecking no" >> ~/.ssh/config
         #ssh -v tuxboyeu@vda4900.is.cc "touch /home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/test2"
-        scp -v  ~/work/unstable-archive/unstable-archive/Boxit/${{ inputs.branch }}-repo-list ${{ inputs.host-user }}@${{ inputs.remote-host }}:/home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/.${{ inputs.branch }}-repo-list
+        scp -v ~/list ${{ inputs.host-user }}@${{ inputs.remote-host }}:/home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/.${{ inputs.branch }}-repo-list
