@@ -128,4 +128,4 @@ runs:
         echo "IdentityFile ~/.ssh/key_server" >> ~/.ssh/config
         echo "StrictHostKeyChecking no" >> ~/.ssh/config
         #ssh -v tuxboyeu@vda4900.is.cc "touch /home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/test2"
-        rsync -vazz --stats -e 'ssh' ~/list ${{ inputs.host-user }}@${{ inputs.remote-host }}:/${{ inputs.remote-path }}/${{ inputs.branch }}/.${{ inputs.branch }}-repo-list
+        rsync -vazz --stats -e 'ssh' ~/list tuxboyeu@vda4900.is.cc:/${{ inputs.remote-path }}/${{ inputs.branch }}/.${{ inputs.branch }}-repo-list
