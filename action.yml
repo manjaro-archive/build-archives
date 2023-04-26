@@ -119,4 +119,4 @@ runs:
         #ssh -v tuxboyeu@vda4900.is.cc "touch /home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/test2"
         rsync -vazz --stats -e 'ssh' ~/list ${{ inputs.host-user }}@vda4900.is.cc:/home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/"${{ inputs.branch }}-archive/${{ inputs.branch }}-list"
       
-        ssh -vt ${{ inputs.host-user }}@vda4900.is.cc "bash -c '/home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/${{ inputs.branch }}-archive/.grab-pkgs.sh'"
+        ssh -vt ${{ inputs.host-user }}@vda4900.is.cc "bash -c '/home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/${{ inputs.branch }}-archive/.grab-{{ inputs.branch }}-pkgs.sh'"
