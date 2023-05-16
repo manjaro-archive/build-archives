@@ -122,5 +122,5 @@ runs:
         mv ~/manjaro-archive-script/grab-branchs-pkgs.sh ~/manjaro-archive-script/.grab-${{ inputs.branch }}-pkgs.sh
         rsync -vazz --stats -e 'ssh' ~/manjaro-archive-script/.grab-${{ inputs.branch }}-pkgs.sh ${{ inputs.host-user }}@vda4900.is.cc:/home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/"${{ inputs.branch }}-archive/.grab-${{ inputs.branch }}-pkgs.sh"
 
-        ssh -vt ${{ inputs.host-user }}@vda4900.is.cc "bash -c 'chmod 744 /home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/${{ inputs.branch }}-archive/.grab-${{ inputs.branch }}-pkgs.sh ${{ inputs.branch }} && \
+        ssh -vt ${{ inputs.host-user }}@vda4900.is.cc "bash -c 'chmod 744 /home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/${{ inputs.branch }}-archive/.grab-${{ inputs.branch }}-pkgs.sh && \
         /home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/${{ inputs.branch }}-archive/.grab-${{ inputs.branch }}-pkgs.sh ${{ inputs.branch }}'"
