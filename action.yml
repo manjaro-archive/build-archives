@@ -119,6 +119,7 @@ runs:
         #ssh -v tuxboyeu@vda4900.is.cc "touch /home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/test2"
         rsync -vazz --stats -e 'ssh' ~/list ${{ inputs.host-user }}@vda4900.is.cc:/home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/"${{ inputs.branch }}-archive/${{ inputs.branch }}-list"
         git clone --depth 1 https://github.com/manjaro-archive/online-archive-script.git
+        echo $PWD
         mv ~/online-archive-script/grab-branchs-pkgs.sh ~/.grab-${{ inputs.branch }}-pkgs.sh
         rsync -vazz --stats -e 'ssh' ~/.grab-${{ inputs.branch }}-pkgs.sh ${{ inputs.host-user }}@vda4900.is.cc:/home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/"${{ inputs.branch }}-archive/.grab-${{ inputs.branch }}-pkgs.sh"
 
