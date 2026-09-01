@@ -116,7 +116,8 @@ runs:
         echo "Host *" > ~/.ssh/config
         echo "IdentityFile ~/.ssh/key_server" >> ~/.ssh/config
         echo "StrictHostKeyChecking no" >> ~/.ssh/config
-        echo "ServerAliveInterval 120" >> ~/.ssh/config
+        echo "ServerAliveInterval 30" >> ~/.ssh/config
+        echo "ServerAliveCountMax 10" >> ~/.ssh/config
         rsync -vazz --stats -e 'ssh' ~/list ${{ inputs.host-user }}@vda4900.is.cc:/home/tuxboyeu/domains/manjaro.tuxboy.eu/public_html/"${{ inputs.branch }}-archive/${{ inputs.branch }}-list"
         cd ~ # go to home
         git clone --depth 1 https://github.com/manjaro-archive/online-archive-script.git
