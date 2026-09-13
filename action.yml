@@ -55,7 +55,7 @@ runs:
       shell: bash
       run: |
         #Build boxit package
-        sudo git clone --depth 1 https://gitlab.manjaro.org/tools/maintenance-tools/boxit.git
+        sudo git clone --depth 1 https://code.manjaro.org/tools/boxit.git
         pushd boxit
         pushd boxit
         pushd src
